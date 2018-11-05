@@ -1,0 +1,110 @@
+Browser = new OpenQA.Selenium.Chrome.ChromeDriver();
+
+            Browser.Manage().Window.Maximize();///Разворачивание окна браузера на весь экран
+
+
+            ///google.com
+            ///
+            try
+            {
+                Browser.Navigate().GoToUrl("http://Google.com");//Переход в браузере по URL
+                IWebElement SearhInput = Browser.FindElement(By.Id("lst-ib"));///Нахождение элемента по его ID
+                SearhInput.SendKeys("Яндекса почта" + OpenQA.Selenium.Keys.Enter);///ввод в поисковыю строку
+            }
+            catch
+            {
+                Browser.Quit(); MessageBox.Show("Опять Гугл капчи шлёт");
+            }
+
+            ///Поиск и Клик по ссылке (поиск по части ссылки)
+            IWebElement Mail;
+            Mail = Browser.FindElement(By.PartialLinkText("mail.yandex.ru"));
+            Mail.Click();
+
+            //Browser.Navigate().GoToUrl("https://mail.yandex.ru/");//Переход в браузере по URL для отладки
+
+
+            ///клик по элементу
+            ///Клик по кнопке "Войти" (Поиск по css)
+            IWebElement Enter;
+            Enter = Browser.FindElement(By.XPath(".//*[text()='Войти']/.."));
+            Enter.Click();
+
+
+            ///Вводим логин пароль
+            IWebElement login;
+            IWebElement password;
+            IWebElement Enter2;
+            login = Browser.FindElement(By.Name("login"));
+            login.SendKeys("Autotestaccount");
+            try
+            { password = Browser.FindElement(By.Name("passwd")); }
+            catch { Browser.Quit(); MessageBox.Show("Не предложил ввести пароль сразу. Бывает"); this.Close(); }
+            finally
+            {
+                password = Browser.FindElement(By.Name("passwd"));
+            }
+            try { password.SendKeys("autoTestaccount"); }
+            catch { Browser.Quit(); MessageBox.Show("Не предложил ввести пароль сразу. Бывает"); this.Close(); }
+                Enter2 = Browser.FindElement(By.CssSelector("#root > div > div.passport-Page-Content > div.passport-Domik > div > div > div > div > div > form > div:nth-child(13) > button:nth-child(1) > span > span"));
+                Enter2.Click();
+            
+
+            if (Browser.FindElement(By.XPath(".//*[text()='Неверный пароль']/..")) == null) { throw new Exception(); }
+
+            password.SendKeys("Testaccount");
+            Enter2.Click();
+            ///Проверяем что зашли именно в наш аккаунт.
+            try { if (Browser.FindElements(By.XPath(".//*[text()='Autotestaccount']/..")).Count() > 0) { } }
+            catch { Browser.Quit(); MessageBox.Show("Не наш аккаунт"); this.Close(); }
+
+            System.Threading.Thread.Sleep(3000);///ждун
+
+            ///Переход на "Написать" новую почту
+            IWebElement NewMail;
+            NewMail = Browser.FindElement(By.CssSelector("div[class='mail-ComposeButton-Wrap']"));
+            NewMail.Click();
+            //Browser.Navigate().GoToUrl("https://mail.yandex.ru/?uid=760865026&login=autotestaccount#compose"); //прямая ссылка на страницу для отладки
+            
+
+            System.Threading.Thread.Sleep(2000);///ждун
+
+            ///вставляем почту в "Кому"
+            IWebElement MailTo; 
+            MailTo = Browser.FindElement(By.CssSelector("div[class='js-compose-field mail-Bubbles']"));
+            MailTo.SendKeys("bragorenko@gmail.com");
+
+            System.Threading.Thread.Sleep(2000);///ждун
+                                                
+            ///Вставляем текст письма
+            IWebElement textmail;
+            textmail = Browser.FindElement(By.CssSelector("div[class='cke_wysiwyg_div cke_reset cke_enable_context_menu cke_editable cke_editable_themed cke_contents_ltr cke_show_borders']"));
+            textmail.SendKeys("Текст письма");
+
+            ///Отправляем письмо
+            ///
+            try
+            {
+                IWebElement sendmail;
+                sendmail = Browser.FindElement(By.CssSelector("button[title='Отправить письмо (Ctrl + Enter)']"));
+                sendmail.Click();
+            }
+            catch { Browser.Quit(); MessageBox.Show("Всплывающее окно опять спамит"); this.Close(); }
+
+
+            System.Threading.Thread.Sleep(2000);///ждун
+
+            ///Переходим в отправленные
+            IWebElement sendermail;
+            sendermail = Browser.FindElement(By.CssSelector("a[href='#sent']"));
+            sendermail.Click();
+
+            System.Threading.Thread.Sleep(2000);///ждун
+
+            ///Проверяем наличие отправленного письма и завершаем тест
+            if (Browser.FindElement(By.CssSelector("span[title='bragorenko@gmail.com']")).Text=="bragorenko" && Browser.FindElement(By.CssSelector("span[title='Текст письма']")).Text == "Текст письма")
+            {
+                MessageBox.Show("Тест выполнен успешно");
+                Browser.Quit();
+                this.Close();
+            }
